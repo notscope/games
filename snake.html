@@ -2,12 +2,18 @@
 <html>
     <head>
         <title>Snake</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Limelight&display=swap" rel="stylesheet">
     </head>
     <body>
         <h2>Snake Game</h2>
         <div id="score">0</div>
         <canvas id="gameCanvas" width="500" height="500"></canvas>
         <style>
+            body {
+                background-color: green;
+            }
             #gameCanvas {
                 position: absolute;
                 top: 50%;
@@ -18,6 +24,13 @@
             #score {
                 text-align: center;
                 font-size: 50px;
+                font-family: monospace;
+            }
+
+            h2 {
+                text-align: center;
+                font-size: 40px;
+                font-family: limelight;
             }
 
         </style>
@@ -28,6 +41,7 @@
             const CANVAS_BACKGROUND_COLOR = 'white';
             const CANVAS_BACKGROUND_COLOR_1 = 'white';
             const CANVAS_BACKGROUND_COLOR_2 = 'lightgray';
+            const SNAKE_HEAD_COLOR = 'lightgreen'
             const SNAKE_COLOR = 'green';
             const SNAKE_BORDER_COLOR = 'darkgreen';
             const FOOD_COLOR = 'red'
@@ -104,12 +118,17 @@
             }
 
             function drawSnake() {
-                snake.forEach(drawSnakePart);
+                snake.forEach((part, index) => drawSnakePart(part, index));
             }
 
-            function drawSnakePart(snakePart) {
-                ctx.fillStyle = SNAKE_COLOR;
-                ctx.strokestyle = SNAKE_BORDER_COLOR;
+            function drawSnakePart(snakePart, index) {
+                if (index === 0) {
+                    ctx.fillStyle = SNAKE_HEAD_COLOR
+                    ctx.strokestyle = SNAKE_BORDER_COLOR
+                } else {
+                    ctx.fillStyle = SNAKE_COLOR;
+                    ctx.strokestyle = SNAKE_BORDER_COLOR;
+                }
 
                 ctx.fillRect(snakePart.x * SCALE_FACTOR, snakePart.y * SCALE_FACTOR, 10 * SCALE_FACTOR, 10 * SCALE_FACTOR);
                 ctx.strokeRect(snakePart.x * SCALE_FACTOR, snakePart.y * SCALE_FACTOR, 10 * SCALE_FACTOR, 10 * SCALE_FACTOR);
