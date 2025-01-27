@@ -6,37 +6,42 @@
     <body>
         <h2>Snake Game</h2>
         <div id="score">0</div>
-        <canvas id="gameCanvas" width="300" height="300"></canvas>
+        <canvas id="gameCanvas" width="500" height="500"></canvas>
         <style>
             #gameCanvas {
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                transform: translate(-50%, -50%);
+                transform: translate(-50%, -50%) scale(1);
             }
 
             #score {
                 text-align: center;
                 font-size: 50px;
             }
+
         </style>
         <script>
 
             // Constant
             const CANVAS_BORDER_COLOR = 'black';
             const CANVAS_BACKGROUND_COLOR = 'white';
+            const CANVAS_BACKGROUND_COLOR_1 = 'white';
+            const CANVAS_BACKGROUND_COLOR_2 = 'lightgray';
             const SNAKE_COLOR = 'green';
             const SNAKE_BORDER_COLOR = 'darkgreen';
             const FOOD_COLOR = 'red'
             const FOOD_BORDER_COLOR = 'darkred'
+            const SCALE_FACTOR = 2.5;
+            const SQUARE_SIZE = SCALE_FACTOR * 10;
 
             // Initialize snake position
             let snake = [
-                {x: 150, y: 150},
                 {x: 140, y: 150},
                 {x: 130, y: 150},
                 {x: 120, y: 150},
-                {x: 110, y: 150}
+                {x: 110, y: 150},
+                {x: 100, y: 150}
             ]
 
             // initial score;
@@ -53,7 +58,7 @@
             var ctx = gameCanvas.getContext("2d");
             
             // select canvas background color
-            ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
+            ctx.fillStyle = CANVAS_BACKGROUND_COLOR_1;
             // select canvas border color
             ctx.strokestyle = CANVAS_BORDER_COLOR;
             
@@ -66,6 +71,7 @@
             createFood();
 
             // Draw food and snake first
+            clearCanvas();
             drawSnake();
             drawFood();
             
@@ -105,28 +111,31 @@
                 ctx.fillStyle = SNAKE_COLOR;
                 ctx.strokestyle = SNAKE_BORDER_COLOR;
 
-                ctx.fillRect(snakePart.x, snakePart.y, 10, 10);
-                ctx.strokeRect(snakePart.x, snakePart.y, 10, 10);
+                ctx.fillRect(snakePart.x * SCALE_FACTOR, snakePart.y * SCALE_FACTOR, 10 * SCALE_FACTOR, 10 * SCALE_FACTOR);
+                ctx.strokeRect(snakePart.x * SCALE_FACTOR, snakePart.y * SCALE_FACTOR, 10 * SCALE_FACTOR, 10 * SCALE_FACTOR);
             } 
 
             function drawFood() {
                 ctx.fillStyle = FOOD_COLOR;
                 ctx.strokestyle = FOOD_BORDER_COLOR;
-                ctx.fillRect(foodX, foodY, 10, 10);
-                ctx.strokeRect(foodX, foodY, 10, 10);
+                ctx.fillRect(foodX * SCALE_FACTOR, foodY * SCALE_FACTOR, 10 * SCALE_FACTOR, 10 * SCALE_FACTOR);
+                ctx.strokeRect(foodX * SCALE_FACTOR, foodY * SCALE_FACTOR, 10 * SCALE_FACTOR, 10 * SCALE_FACTOR);
             }
 
             function clearCanvas() {
-                ctx.fillStyle = 'white';
-                ctx.strokestyle = 'black';
-
-                ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+                for (let y = 0; y < gameCanvas.height / SQUARE_SIZE; y++) {
+                    for (let x = 0; x < gameCanvas.width / SQUARE_SIZE; x++) {
+                        ctx.fillStyle = (x + y) % 2 === 0 ? CANVAS_BACKGROUND_COLOR_1 : CANVAS_BACKGROUND_COLOR_2;
+                        ctx.fillRect(x * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+                    }
+                }
+                ctx.strokeStyle = CANVAS_BORDER_COLOR;
                 ctx.strokeRect(0, 0, gameCanvas.width, gameCanvas.height);
             }
 
             function createFood() {
-                foodX = randomTen(0, gameCanvas.width - 10);
-                foodY = randomTen(0, gameCanvas.height - 10);
+                foodX = randomTen(0, gameCanvas.width / SCALE_FACTOR - 10);
+                foodY = randomTen(0, gameCanvas.height / SCALE_FACTOR - 10);
 
                 snake.forEach(function isFoodOnSnake(part) {
                     const foodIsOnSnake = part.x == foodX && part.y == foodY
@@ -208,9 +217,11 @@
                 }
 
                 const hitLeftWall = snake[0].x < 0
-                const hitRightWall = snake[0].x > gameCanvas.width - 10;
+                // const hitRightWall = snake[0].x >= gameCanvas.width - 10;
+                const hitRightWall = snake[0].x >= (gameCanvas.width / SCALE_FACTOR);
                 const hitTopWall = snake[0].y < 0
-                const hitBottomWall = snake[0].y > gameCanvas.height - 10;
+                //const hitBottomWall = snake[0].y >= gameCanvas.height - 10;
+                const hitBottomWall = snake[0].y >= gameCanvas.height / SCALE_FACTOR;
 
                 return hitLeftWall || hitRightWall || hitTopWall || hitBottomWall
             }
