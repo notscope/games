@@ -118,7 +118,7 @@ class Game:
             if next_position == self.current_apple.location:
                 self.snake.extend_body(next_position)
                 self.regenerate_apple()
-                self.GAME_SCORE += 1
+                self.GAME_SCORE += 10
             else:
                 self.snake.take_step(next_position)
             
@@ -140,7 +140,13 @@ class Game:
     def render(self):
         self.stdscr.clear()
         matrix = self.board_matrix()
-        TOP_BOTTOM_BORDER = "+" + "-" * self.width + "+"
+
+        WALL_VERTICAL = "│"
+        WALL_HORIZONTAL = "─"
+
+        TOP_BOTTOM_BORDER = "+" + WALL_HORIZONTAL * self.width + "+" 
+        TOP_BORDER = "┌" + WALL_HORIZONTAL * self.width + "┐"
+        BOTTOM_BORDER = "└" + WALL_HORIZONTAL * self.width + "┘"
 
         # Get terminal size
         term_height, term_width = self.stdscr.getmaxyx()
@@ -149,14 +155,14 @@ class Game:
         start_x = (term_width - (self.width + 2)) // 2
 
         # Add game score
-        self.stdscr.addstr(start_y - 1, start_x, ("SCORE: " + str(self.GAME_SCORE)))
+        self.stdscr.addstr(start_y - 1, start_x, ("SCORE:" + str(self.GAME_SCORE)))
 
         # Draw top border
-        self.stdscr.addstr(start_y, start_x, TOP_BOTTOM_BORDER)
+        self.stdscr.addstr(start_y, start_x, TOP_BORDER)
 
         # Draw game area with side borders
         for y in range(self.height):
-            self.stdscr.addch(start_y + y + 1, start_x, '│')
+            self.stdscr.addch(start_y + y + 1, start_x, WALL_VERTICAL)
             for x in range(self.width):
                 cell_val = matrix[x][self.height-1-y]
                 if cell_val == self.APPLE:
@@ -165,10 +171,10 @@ class Game:
                     self.stdscr.addch(start_y + y + 1, start_x + x + 1, self.DISPLAY_CHARS[cell_val], curses.color_pair(2))
                 else:
                     self.stdscr.addch(start_y + y + 1, start_x + x + 1, self.DISPLAY_CHARS[cell_val])
-            self.stdscr.addch(start_y + y + 1, start_x + self.width + 1, '│')
+            self.stdscr.addch(start_y + y + 1, start_x + self.width + 1, WALL_VERTICAL)
 
         # Draw bottom border
-        self.stdscr.addstr(start_y + self.height + 1, start_x, TOP_BOTTOM_BORDER)
+        self.stdscr.addstr(start_y + self.height + 1, start_x, BOTTOM_BORDER)
 
         self.stdscr.refresh()
 
