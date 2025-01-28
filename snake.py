@@ -184,6 +184,7 @@ class Game:
 
         # Draw bottom border
         self.stdscr.addstr(start_y + self.height + 1, start_x, BOTTOM_BORDER)
+        self.stdscr.addstr(start_y + self.height + 2, start_x, "CONTROLS: W/↑ S/↓ A/← D/→")
 
         self.stdscr.refresh()
 
