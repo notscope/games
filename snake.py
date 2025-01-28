@@ -66,7 +66,10 @@ class Game:
         self.regenerate_apple()
     
     def play(self):
-        curses.wrapper(self.curses_play)
+        try:
+            curses.wrapper(self.curses_play)
+        except KeyboardInterrupt:
+            exit(0)
 
     def curses_play(self, stdscr):
         curses.curs_set(0)
@@ -109,9 +112,13 @@ class Game:
             next_position = self.next_position(self.snake.head(), self.snake.direction)
             # check if the snake hits the wall
             if next_position[0] < 0 or next_position[0] >= self.width or next_position[1] < 0 or next_position[1] >= self.height:
+                print("\nGame Over!")
+                print(f"Final Score: {self.GAME_SCORE}")
                 break
             # check if the snake hits itself
             if next_position in self.snake.body:
+                print("\nGame Over!")
+                print(f"Final Score: {self.GAME_SCORE}")
                 break
 
             # check if the snake eats the apple
@@ -123,6 +130,8 @@ class Game:
                 self.snake.take_step(next_position)
             
             self.render()
+
+
 
     def board_matrix(self):
         matrix = [[self.EMPTY for _ in range(self.height)] for _ in range(self.width)]
@@ -197,4 +206,4 @@ class Game:
 
 game = Game(30, 10)
 game.play()
-print("GAME OVER!")
+print(f"Game Over! Your Score: {game.GAME_SCORE}")
