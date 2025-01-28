@@ -9,7 +9,7 @@
     <body>
         <h2>Snake Game</h2>
         <div id="score">0</div>
-        <canvas id="gameCanvas" width="500" height="500"></canvas>
+        <canvas id="gameCanvas" width="450" height="450"></canvas>
         <style>
             body {
                 background-color: green;
@@ -39,10 +39,10 @@
             // Constant
             const CANVAS_BORDER_COLOR = 'black';
             const CANVAS_BACKGROUND_COLOR = 'white';
-            const CANVAS_BACKGROUND_COLOR_1 = 'white';
-            const CANVAS_BACKGROUND_COLOR_2 = 'lightgray';
-            const SNAKE_HEAD_COLOR = 'lightgreen'
-            const SNAKE_COLOR = 'green';
+            const CANVAS_BACKGROUND_COLOR_1 = '#A2D049';
+            const CANVAS_BACKGROUND_COLOR_2 = '#AAD660';
+            const SNAKE_HEAD_COLOR = 'lightblue'
+            const SNAKE_COLOR = 'blue';
             const SNAKE_BORDER_COLOR = 'darkgreen';
             const FOOD_COLOR = 'red'
             const FOOD_BORDER_COLOR = 'darkred'
@@ -51,11 +51,11 @@
 
             // Initialize snake position
             let snake = [
-                {x: 140, y: 150},
-                {x: 130, y: 150},
-                {x: 120, y: 150},
-                {x: 110, y: 150},
-                {x: 100, y: 150}
+                {x: 140, y: 140},
+                {x: 130, y: 140},
+                {x: 120, y: 140},
+                {x: 110, y: 140},
+                {x: 100, y: 140}
             ]
 
             // initial score;
