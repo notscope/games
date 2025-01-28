@@ -30,9 +30,9 @@ class Game:
 
     DISPLAY_CHARS = {
         EMPTY: " ",
-        BODY: "O",
-        HEAD: "X",
-        APPLE: "*",
+        BODY: "█",
+        HEAD: "█",
+        APPLE: "█",
     }
 
     DIR_UP = (0, 1)
@@ -40,15 +40,19 @@ class Game:
     DIR_LEFT = (-1, 0)
     DIR_RIGHT = (1, 0)
 
-    INPUT_CHAR_UP = "W"
-    INPUT_CHAR_DOWN = "S"
-    INPUT_CHAR_LEFT = "A"
-    INPUT_CHAR_RIGHT = "D"
+    INPUT_CHAR_UP = 119
+    INPUT_CHAR_DOWN = 115
+    INPUT_CHAR_LEFT = 97
+    INPUT_CHAR_RIGHT = 100
+
+    GAME_SPEED = 170
+    GAME_SCORE = 0
 
     def __init__(self, width, height):
         self.height = height
         self.width = width
 
+        # initialize snake position
         snake_body = [
             (0, 5),
             (1, 5),
@@ -62,27 +66,59 @@ class Game:
         self.regenerate_apple()
     
     def play(self):
-        self.regenerate_apple
-        self.render()
-        while True:
-            ch = input("").upper()
+        curses.wrapper(self.curses_play)
 
-            if ch == self.INPUT_CHAR_UP and self.snake.direction != self.DIR_DOWN:
-                self.snake.set_direction(self.DIR_UP)
-            elif ch == self.INPUT_CHAR_DOWN and self.snake.direction != self.DIR_UP:
-                self.snake.set_direction(self.DIR_DOWN)
-            elif ch == self.INPUT_CHAR_LEFT and self.snake.direction != self.DIR_RIGHT:
-                self.snake.set_direction(self.DIR_LEFT)
-            elif ch == self.INPUT_CHAR_RIGHT and self.snake.direction != self.DIR_LEFT:
-                self.snake.set_direction(self.DIR_RIGHT)
+    def curses_play(self, stdscr):
+        curses.curs_set(0)
+        stdscr.nodelay(1)
+        stdscr.timeout(self.GAME_SPEED)
+
+        # Initialize color pairs
+        curses.start_color()
+        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Green color pair for snake
+
+        self.stdscr = stdscr
+        self.regenerate_apple()
+        self.render()
+
+        while True:
+            ch = stdscr.getch()
+            if ch != -1:
+            # Handle both letter keys and arrow keys
+                if ch == curses.KEY_UP and self.snake.direction != self.DIR_DOWN:
+                    self.snake.set_direction(self.DIR_UP)
+                elif ch == curses.KEY_DOWN and self.snake.direction != self.DIR_UP:
+                    self.snake.set_direction(self.DIR_DOWN)
+                elif ch == curses.KEY_LEFT and self.snake.direction != self.DIR_RIGHT:
+                    self.snake.set_direction(self.DIR_LEFT)
+                elif ch == curses.KEY_RIGHT and self.snake.direction != self.DIR_LEFT:
+                    self.snake.set_direction(self.DIR_RIGHT)
+
+                elif ch == self.INPUT_CHAR_UP and self.snake.direction != self.DIR_DOWN:
+                    self.snake.set_direction(self.DIR_UP)
+                elif ch == self.INPUT_CHAR_DOWN and self.snake.direction != self.DIR_UP:
+                    self.snake.set_direction(self.DIR_DOWN)
+                elif ch == self.INPUT_CHAR_LEFT and self.snake.direction != self.DIR_RIGHT:
+                    self.snake.set_direction(self.DIR_LEFT)
+                elif ch == self.INPUT_CHAR_RIGHT and self.snake.direction != self.DIR_LEFT:
+                    self.snake.set_direction(self.DIR_RIGHT)
+
+
 
             next_position = self.next_position(self.snake.head(), self.snake.direction)
+            # check if the snake hits the wall
+            if next_position[0] < 0 or next_position[0] >= self.width or next_position[1] < 0 or next_position[1] >= self.height:
+                break
+            # check if the snake hits itself
             if next_position in self.snake.body:
                 break
 
+            # check if the snake eats the apple
             if next_position == self.current_apple.location:
                 self.snake.extend_body(next_position)
                 self.regenerate_apple()
+                self.GAME_SCORE += 1
             else:
                 self.snake.take_step(next_position)
             
@@ -102,25 +138,44 @@ class Game:
         return matrix
     
     def render(self):
+        self.stdscr.clear()
         matrix = self.board_matrix()
+        TOP_BOTTOM_BORDER = "+" + "-" * self.width + "+"
 
-        top_bottom_border = "+" + "-" * (self.width) + "+"
-        print(top_bottom_border)
-        for y in range(0, self.height):
-            line = "|"
-            for x in range(0, self.width):
+        # Get terminal size
+        term_height, term_width = self.stdscr.getmaxyx()
+
+        start_y = (term_height - (self.height + 2)) // 2
+        start_x = (term_width - (self.width + 2)) // 2
+
+        # Add game score
+        self.stdscr.addstr(start_y - 1, start_x, ("SCORE: " + str(self.GAME_SCORE)))
+
+        # Draw top border
+        self.stdscr.addstr(start_y, start_x, TOP_BOTTOM_BORDER)
+
+        # Draw game area with side borders
+        for y in range(self.height):
+            self.stdscr.addch(start_y + y + 1, start_x, '│')
+            for x in range(self.width):
                 cell_val = matrix[x][self.height-1-y]
-                line += self.DISPLAY_CHARS[cell_val]
-            line += "|"
-            print(line)
-        print(top_bottom_border)
+                if cell_val == self.APPLE:
+                    self.stdscr.addch(start_y + y + 1, start_x + x + 1, self.DISPLAY_CHARS[cell_val], curses.color_pair(1))
+                elif cell_val in (self.BODY, self.HEAD):
+                    self.stdscr.addch(start_y + y + 1, start_x + x + 1, self.DISPLAY_CHARS[cell_val], curses.color_pair(2))
+                else:
+                    self.stdscr.addch(start_y + y + 1, start_x + x + 1, self.DISPLAY_CHARS[cell_val])
+            self.stdscr.addch(start_y + y + 1, start_x + self.width + 1, '│')
 
-        # Print matrix row by row with formatted elements and side borders
+        # Draw bottom border
+        self.stdscr.addstr(start_y + self.height + 1, start_x, TOP_BOTTOM_BORDER)
+
+        self.stdscr.refresh()
 
     def next_position(self, position, step):
         return (
-            (position[0] + step[0]) % self.width,
-            (position[1] + step[1]) % self.height
+            position[0] + step[0],
+            position[1] + step[1],
         )
     
     def regenerate_apple(self):
@@ -136,3 +191,4 @@ class Game:
 
 game = Game(30, 10)
 game.play()
+print("GAME OVER!")
