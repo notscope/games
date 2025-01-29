@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Snake</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Limelight&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <h2>Snake Game</h2>
+        <div id="score">0</div>
+        <canvas id="gameCanvas" width="450" height="450"></canvas>
+        <style>
+            body {
+                background-color: green;
+            }
+            #gameCanvas {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            #score {
+                text-align: center;
+                font-size: 50px;
+                font-family: monospace;
+            }
+
+            h2 {
+                text-align: center;
+                font-size: 40px;
+                font-family: limelight;
+            }
+
+        </style>
+        <script>
+            const CANVAS_BORDER_COLOR = 'black';
+            const CANVAS_BACKGROUND_COLOR_1 = '#A2D049';
+            const CANVAS_BACKGROUND_COLOR_2 = '#AAD660';
+            const SNAKE_HEAD_COLOR = 'lightblue';
+            const SNAKE_COLOR = 'blue';
+            const SNAKE_BORDER_COLOR = 'darkgreen';
+            const FOOD_COLOR = 'red';
+            const FOOD_BORDER_COLOR = 'darkred';
+            const SCALE_FACTOR = 2.5;
+            const SQUARE_SIZE = SCALE_FACTOR * 10;
+
+            let snake = [
+                {x: 140, y: 140},
+                {x: 130, y: 140},
+                {x: 120, y: 140},
+                {x: 110, y: 140},
+                {x: 100, y: 140}
+            ];
+
+            let score = 0;
+            let dx = 10;
+            let dy = 0;
+            let changingDirection = false;
+            let isGameStarted = false;
+
+            var gameCanvas = document.getElementById("gameCanvas");
+            var ctx = gameCanvas.getContext("2d");
+            
+            ctx.fillStyle = CANVAS_BACKGROUND_COLOR_1;
+            ctx.strokestyle = CANVAS_BORDER_COLOR;
+            ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+            ctx.strokeRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+            createFood();
+            clearCanvas();
+            drawSnake();
+            drawFood();
+            
+            document.addEventListener("keydown", changeDirection);
+                
+            function main() {
+                if (!isGameStarted) return;
+                if (didGameEnd()) return;
+
+                setTimeout(function onTick() {
+                    changingDirection = false;
+                    clearCanvas();
+                    drawFood();
+                    moveSnake();
+                    drawSnake();
+                    main();
+                }, 100);
+            }
+
+            function drawSnake() {
+                snake.forEach((part, index) => drawSnakePart(part, index));
+            }
+
+            function drawSnakePart(snakePart, index) {
+                ctx.fillStyle = index === 0 ? SNAKE_HEAD_COLOR : SNAKE_COLOR;
+                ctx.strokestyle = SNAKE_BORDER_COLOR;
+                ctx.fillRect(snakePart.x * SCALE_FACTOR, snakePart.y * SCALE_FACTOR, SQUARE_SIZE, SQUARE_SIZE);
+                ctx.strokeRect(snakePart.x * SCALE_FACTOR, snakePart.y * SCALE_FACTOR, SQUARE_SIZE, SQUARE_SIZE);
+            }
+
+            function moveSnake() {
+                const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+                if (head.x < 0 || head.x >= gameCanvas.width / SCALE_FACTOR || head.y < 0 || head.y >= gameCanvas.height / SCALE_FACTOR) {
+                    return;
+                }
+                snake.unshift(head);
+                const didEatFood = snake[0].x === foodX && snake[0].y === foodY;
+                if (didEatFood) {
+                    score += 10;
+                    document.getElementById('score').innerHTML = score;
+                    createFood();
+                } else {
+                    snake.pop();
+                }
+            }
+
+            function didGameEnd() {
+                for (let i = 4; i < snake.length; i++) {
+                    if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
+                }
+                return false;
+            }
+
+            function createFood() {
+                foodX = randomTen(0, gameCanvas.width / SCALE_FACTOR - 10);
+                foodY = randomTen(0, gameCanvas.height / SCALE_FACTOR - 10);
+
+                snake.forEach(part => {
+                    if (part.x == foodX && part.y == foodY) createFood();
+                });
+            }
+
+            function randomTen(min, max) {
+                return Math.round((Math.random() * (max - min) + min) / 10) * 10;
+            }
+
+            function changeDirection(event) {
+                const LEFT_KEY = 37;
+                const RIGHT_KEY = 39;
+                const UP_KEY = 38;
+                const DOWN_KEY = 40;
+                const W_KEY = 87;
+                const A_KEY = 65;
+                const S_KEY = 83;
+                const D_KEY = 68;
+
+                const keyPressed = event.keyCode;
+
+                if (!isGameStarted) {
+                    if ([UP_KEY, RIGHT_KEY, DOWN_KEY, W_KEY, D_KEY, S_KEY].includes(keyPressed)) {
+                        isGameStarted = true;
+                        if ([UP_KEY, W_KEY].includes(keyPressed)) { dx = 0; dy = -10; }
+                        if ([RIGHT_KEY, D_KEY].includes(keyPressed)) { dx = 10; dy = 0; }
+                        if ([DOWN_KEY, S_KEY].includes(keyPressed)) { dx = 0; dy = 10; }
+                        main();
+                    }
+                } else {
+                    if ((keyPressed === LEFT_KEY || keyPressed === A_KEY) && dx === 0) { dx = -10; dy = 0; }
+                    if ((keyPressed === UP_KEY || keyPressed === W_KEY) && dy === 0) { dx = 0; dy = -10; }
+                    if ((keyPressed === RIGHT_KEY || keyPressed === D_KEY) && dx === 0) { dx = 10; dy = 0; }
+                    if ((keyPressed === DOWN_KEY || keyPressed === S_KEY) && dy === 0) { dx = 0; dy = 10; }
+                }
+            }
+        </script>
+    </body>
+</html>
