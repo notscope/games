@@ -50,23 +50,25 @@ class Snake():
 
 
 class Fruit():
-    def __init__(self):
+    def __init__(self, snake):
+        self.snake = snake
         self.regenerate()
-
 
     def draw(self):
         fruit_rect = pygame.Rect(self.pos.x * CELL_SIZE, self.pos.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
         pygame.draw.rect(screen, (255, 0, 0), fruit_rect)
 
     def regenerate(self):
-        self.x = random.randint(0, CELL_ROW - 1) * CELL_SIZE
-        self.y = random.randint(0, CELL_COL - 1) * CELL_SIZE
-        self.pos = Vector2(random.randint(0, CELL_ROW - 1), random.randint(0, CELL_COL - 1))
+        while True:
+            self.pos = Vector2(random.randint(0, CELL_ROW - 1), random.randint(0, CELL_COL - 1))
+            if self.pos not in self.snake.body:
+                break
+
 
 class Game:
     def __init__(self):
         self.snake = Snake()
-        self.fruit = Fruit()
+        self.fruit = Fruit(self.snake)  # Pass the snake to Fruit
 
     def update(self):
         self.snake.move_snake()

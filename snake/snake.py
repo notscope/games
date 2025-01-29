@@ -32,7 +32,7 @@ class Game:
         EMPTY: " ",
         BODY: "█",
         HEAD: "█",
-        APPLE: "█",
+        APPLE: "o",
     }
 
     DIR_UP = (0, 1)
